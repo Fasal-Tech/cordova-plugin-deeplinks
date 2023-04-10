@@ -6,19 +6,19 @@ Location: ProjectName/
 Script only generates content. File it self is included in the xcode project in another hook: xcodePreferences.js.
 */
 
-var path = require('path');
-var fs = require('fs');
-var plist = require('plist');
-var mkpath = require('mkpath');
-var ConfigXmlHelper = require('../configXmlHelper.js');
-var ASSOCIATED_DOMAINS = 'com.apple.developer.associated-domains';
+var path = require("path");
+var fs = require("fs");
+var plist = require("plist");
+var mkpath = require("mkpath");
+var ConfigXmlHelper = require("../configXmlHelper.js");
+var ASSOCIATED_DOMAINS = "com.apple.developer.associated-domains";
 var context;
 var projectRoot;
 var projectName;
 var entitlementsFilePath;
 
 module.exports = {
-  generateAssociatedDomainsEntitlements: generateEntitlements
+  generateAssociatedDomainsEntitlements: generateEntitlements,
 };
 
 // region Public API
@@ -33,7 +33,10 @@ function generateEntitlements(cordovaContext, pluginPreferences) {
   context = cordovaContext;
 
   var currentEntitlements = getEntitlementsFileContent();
-  var newEntitlements = injectPreferences(currentEntitlements, pluginPreferences);
+  var newEntitlements = injectPreferences(
+    currentEntitlements,
+    pluginPreferences
+  );
 
   saveContentToEntitlementsFile(newEntitlements);
 }
@@ -55,7 +58,7 @@ function saveContentToEntitlementsFile(content) {
   mkpath.sync(path.dirname(filePath));
 
   // save it's content
-  fs.writeFileSync(filePath, plistContent, 'utf8');
+  fs.writeFileSync(filePath, plistContent, "utf8");
 }
 
 /**
@@ -68,7 +71,7 @@ function getEntitlementsFileContent() {
   var content;
 
   try {
-    content = fs.readFileSync(pathToFile, 'utf8');
+    content = fs.readFileSync(pathToFile, "utf8");
   } catch (err) {
     return defaultEntitlementsFile();
   }
@@ -97,6 +100,7 @@ function injectPreferences(currentEntitlements, pluginPreferences) {
   var content = generateAssociatedDomainsContent(pluginPreferences);
 
   newEntitlements[ASSOCIATED_DOMAINS] = content;
+  newEntitlements["aps-environment"] = "production";
 
   return newEntitlements;
 }
@@ -111,7 +115,7 @@ function generateAssociatedDomainsContent(pluginPreferences) {
   var domainsList = [];
 
   // generate list of host links
-  pluginPreferences.hosts.forEach(function(host) {
+  pluginPreferences.hosts.forEach(function (host) {
     var link = domainsListEntryForHost(host);
     if (domainsList.indexOf(link) == -1) {
       domainsList.push(link);
@@ -128,7 +132,7 @@ function generateAssociatedDomainsContent(pluginPreferences) {
  * @return {String} record
  */
 function domainsListEntryForHost(host) {
-  return 'applinks:' + host.name;
+  return "applinks:" + host.name;
 }
 
 // endregion
@@ -142,7 +146,14 @@ function domainsListEntryForHost(host) {
  */
 function pathToEntitlementsFile() {
   if (entitlementsFilePath === undefined) {
-    entitlementsFilePath = path.join(getProjectRoot(), 'platforms', 'ios', getProjectName(), 'Resources', getProjectName() + '.entitlements');
+    entitlementsFilePath = path.join(
+      getProjectRoot(),
+      "platforms",
+      "ios",
+      getProjectName(),
+      "Resources",
+      getProjectName() + ".entitlements"
+    );
   }
 
   return entitlementsFilePath;
